@@ -10,3 +10,5 @@ This project is built in django, there are two apps in there consisting API(s) f
    b.Agent retrieving list of clients/users they've registered.[GET]
    c. products/ - A viewset for admin to list, create products [GET,POST].
    d. Agents and users buying/creating orders for desired products. [GET]
+The authentication part where I validate token and retrieve user details in each view can be improved, those certain lines of repetitive code could've been avoided but
+would've required susbsequent time in setting up permissions and jwt customizations  and that would be a detour from completing the task, hence I went for a consistent approach.
