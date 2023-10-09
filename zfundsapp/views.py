@@ -118,6 +118,20 @@ class GetAdvisorClientsView(ListAPIView):
     
 
 class ProductsViewset(viewsets.ModelViewSet):
+    """ 
+        URL: {{HOST}}/app/products/
+        METHOD: [GET/PUT/POST/DELETE]
+        HEADERS: {
+                    "KEY": "TOKEN",
+                }
+        BODY: {
+                "name": "Reliance",
+                "category": "mutual_funds",
+                "code": "RMFS",
+                "price": "12000"
+            }
+    """
+
     
     queryset = Products.objects.all()
     serializer_class = ProductsSerializer
@@ -176,6 +190,19 @@ class ProductsViewset(viewsets.ModelViewSet):
 
 class ListCreateOrderView(ListCreateAPIView):
 
+    """ 
+        URL: {{HOST}}/app/list-create-orders/
+        METHOD: [GET/POST]
+        HEADERS: {
+                    "KEY": "TOKEN",
+                }
+        BODY: {
+                "products": [1, 2],
+                "status": "Complete",
+                "total_price": 12000,
+                "client_mobile": 1010101011
+            }
+    """
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
 
