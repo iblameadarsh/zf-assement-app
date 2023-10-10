@@ -220,20 +220,6 @@ class ListCreateOrderView(ListCreateAPIView):
         from core.utils import validate_token
         if not validate_token(user.valid_from):
             raise AuthenticationFailed('Token expired!')
-        
-        token = self.request.META.get('HTTP_KEY')
-        if not token:
-            raise ParseError('Please pass authentication token to proceed!')
-        
-        user = User.objects.filter(token=token).last()
-        
-        if not user:
-            raise AuthenticationFailed('Invalid token provided, user not found!')
-        
-        from core.utils import validate_token
-        if not validate_token(user.valid_from):
-            raise AuthenticationFailed('Token expired!')
-
 
         serializer = self.serializer_class(
             data=request.data, context={"request": request})
@@ -259,5 +245,7 @@ class ListCreateOrderView(ListCreateAPIView):
         order_obj.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    def get_queryset(self):
+        
 
 
