@@ -170,8 +170,6 @@ class ProductsViewset(viewsets.ModelViewSet):
         if not validate_token(user.valid_from):
             raise AuthenticationFailed('Token expired!')
                 
-        if user.usergroup != 'Advisor':
-            raise PermissionDenied('Permission denied! Admin users only.')
         return super().list(request, *args, **kwargs)
 
 
@@ -233,5 +231,29 @@ class ListCreateOrderView(ListCreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         
+        #The get_queryset method will handle the GET request to return associated orders to user/advisor. 
+        
+        def get_queryset(self):
+
+            token = self.request.META.get('HTTP_KEY')
+            if not token:
+                raise ParseError('Please pass authentication token to proceed!')
+            
+            user = User.objects.filter(token=token).last()
+            
+            if not user:
+                raise AuthenticationFailed('Invalid token provided, user not found!')
+            
+            from core.utils import validate_token
+            if not validate_token(user.valid_from):
+                raise AuthenticationFailed('Token expired!')
+            
+            if user.usergroup == 'Advisor':
+                data = self.queryset.filter(buyer=user)
+            elif user.usergroup == 'Consumer':
+                data = self.queryset.filter(user=user)
+            else:
+                data = Order.objects.none()
+            return data
 
 
