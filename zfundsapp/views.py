@@ -12,6 +12,8 @@ from authentication.models import User
 from authentication.serializers import UserSerializer
 from zfundsapp.serializers import AdvisorAddClientSerializer, ProductsSerializer, OrderSerializer
 from zfundsapp.models import Products, Order
+from core.utils import validate_token
+
 # from core.utils import IsAdmin
 
 #third-party imports
@@ -45,7 +47,6 @@ class AdvisorAddClientView(APIView):
         if not user:
             raise AuthenticationFailed('Invalid token provided, user not found!')
         
-        from core.utils import validate_token
         if not validate_token(user.valid_from):
             raise AuthenticationFailed('Token expired!')
         
@@ -105,7 +106,6 @@ class GetAdvisorClientsView(ListAPIView):
         if not user:
             raise AuthenticationFailed('Invalid token provided, user not found!')
         
-        from core.utils import validate_token
         if not validate_token(user.valid_from):
             raise AuthenticationFailed('Token expired!')
         
@@ -146,7 +146,6 @@ class ProductsViewset(viewsets.ModelViewSet):
         if not user:
             raise AuthenticationFailed('Invalid token provided, user not found!')
         
-        from core.utils import validate_token
         if not validate_token(user.valid_from):
             raise AuthenticationFailed('Token expired!')
         
@@ -166,7 +165,6 @@ class ProductsViewset(viewsets.ModelViewSet):
         if not user:
             raise AuthenticationFailed('Invalid token provided, user not found!')
         
-        from core.utils import validate_token
         if not validate_token(user.valid_from):
             raise AuthenticationFailed('Token expired!')
                 
@@ -202,7 +200,6 @@ class ListCreateOrderView(ListCreateAPIView):
         if not user:
             raise AuthenticationFailed('Invalid token provided, user not found!')
         
-        from core.utils import validate_token
         if not validate_token(user.valid_from):
             raise AuthenticationFailed('Token expired!')
 
@@ -231,29 +228,28 @@ class ListCreateOrderView(ListCreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         
-        #The get_queryset method will handle the GET request to return associated orders to user/advisor. 
-        
-        def get_queryset(self):
+    #The get_queryset method will handle the GET request to return associated orders to user/advisor. 
+    
+    def get_queryset(self):
 
-            token = self.request.META.get('HTTP_KEY')
-            if not token:
-                raise ParseError('Please pass authentication token to proceed!')
-            
-            user = User.objects.filter(token=token).last()
-            
-            if not user:
-                raise AuthenticationFailed('Invalid token provided, user not found!')
-            
-            from core.utils import validate_token
-            if not validate_token(user.valid_from):
-                raise AuthenticationFailed('Token expired!')
-            
-            if user.usergroup == 'Advisor':
-                data = self.queryset.filter(buyer=user)
-            elif user.usergroup == 'Consumer':
-                data = self.queryset.filter(user=user)
-            else:
-                data = Order.objects.none()
-            return data
+        token = self.request.META.get('HTTP_KEY')
+        if not token:
+            raise ParseError('Please pass authentication token to proceed!')
+        
+        user = User.objects.filter(token=token).last()
+        
+        if not user:
+            raise AuthenticationFailed('Invalid token provided, user not found!')
+        
+        if not validate_token(user.valid_from):
+            raise AuthenticationFailed('Token expired!')
+        
+        if user.usergroup == 'Advisor':
+            data = self.queryset.filter(buyer=user)
+        elif user.usergroup == 'Consumer':
+            data = self.queryset.filter(user=user)
+        else:
+            data = Order.objects.none()
+        return data
 
 
